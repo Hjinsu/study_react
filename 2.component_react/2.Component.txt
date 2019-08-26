@@ -1,0 +1,59 @@
+-모듈 불러오기(import)
+외부 컴포넌트를 import시킨다.
+<클래스 이름/>
+
+-export
+다른 파일에서 이 파일을 import할 때 위족에 선언한 class 이름을 불러오도록 설장한다.
+
+-Props
+properties를 줄인 표현으로 컴포넌트 속성을 설정할 때 사용하는 요소.
+props 값은 해당 컴포넌트를 불러와 사용하는 부모 컴포넌트에서만 설정할 수 있다.
+props의 값 설정 및 검증
+props 렌더링 -> props 값 설정 -> props 기본 값 설정 -> props 값 검증
+
+-JSX 내부에서 props 렌더링
+JSX 내부에서 {}안에 감싸주고 this 키워드를 사용해서 props를 렌더링 해준다.
+
+-props의 기본값 (defaultProps)
+클래스.defaultProps = {}, static defaultProps = {}
+이 두 방법은 차이 점이 없다. 간결하게 작성하고자 하면 두번째 방식을 사용.(취향 차이)
+
+-props 검증 : PropTypes
+props의 속성(타입)을 지정할 때에는 PropTypes를 사용한다.
+위의 기본값 설정과 같은 형식으로 지정해줄 수 있다.
+PropTypes를 사용하기 위해선 import를 시켜야 한다.
+필수로 PropTypes를 설정 할때는 .isRequired를 사용한다.
+문자열 이외의 값을 컴포넌트에 전달할 때는 {}로 감싸야 한다.
+
+-PropTypes의 종류
+array : 배열, bool : 논리, func : 함수, number : 숫자, string : 문자열, object : 객체,
+symbol : ES6의 symbol객체, node : 렌더링 할 수 있는 모든 것(숫자, 문자열, element 또는 이들로 구성된 배열),
+element : 리액트 요소, instanceOf(MyClass) : 특정 클래스의 인스턴스, 
+oneOf(['male', 'femail']) : 주어진 배열 요소중 하나,
+oneOfType([React.PropTypes.string, React.PropTypes.number]) : 주어진 배열안의 종류 중 하나,
+arrayOf(React.PropTypes.number) : 주어진 종류로 구성된 배열,
+objectOf(React.PropTypes.number) : 주어진 종류의 값을 가진 객체
+shape({name : React.PropTypes.string, age : React.PropTypes.number}) : 주어진 스키마를 가진 객체,
+any : 아무 종류
+
+defaultProps 와 PropTypes는 코드 작성시 필수요소는 아니지많 협업개발을 할때 어떤 prop를 사용하는지 또는 필요한지를
+쉽게 알수 있게 해준다.
+
+-prop의 우선순위는 부모 컴포넌트가 보내준 prop값이 마지막에 설정된다.
+
+-state
+props는 부모 컴포넌트가 설정하며, 컴포너늩 자신은 해당 props를 읽기 전용으로만 사용할 수 있다. 
+컴포너늩 내부에서 읽고 또 업데이트할 수 있는 값을 사용하기위해 state를 사용하고 
+이것은 언제나 기본값을 '미리' 설정해야 사용할 수 있으며 this.setState()메소드로만 값을 업데이트 해야한다.
+-state 값 설정 및 업데이트
+state 초기값 설정 -> state 렌더링 -> state 값 업데이트
+
+컴포넌트 생성자 construct()
+state 초기값은 컴포넌트의 생성자 메소드 constructor 내부에서 설정한다. 
+생성자 메소드는 컴포넌트를 새로 만들 때 실행된다.
+state는 constructor 바깥에서도 정의가 가능하다.
+
+-this.setState() 사용법
+this.setState({
+    key : 변경할 value
+})
