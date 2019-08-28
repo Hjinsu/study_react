@@ -1,0 +1,98 @@
+-라이프 사이클
+모든 리액트 컴포넌트에는 라이프사이클이 존재한다. 
+컴포넌트의 수명은 페이지에 렌더링 되기 전, 준비 과정에서 시작하여 페이지에서 사라질 때 끝난다.
+라이프사이클 메서드를 사용할때는 컴포넌트를 처음으로 렌더링 할 때 어떤 작업을 처리해야 한다던지
+컴포넌트를 업데이트하기 전,후로 어떤 작업을 처리하거나 불필요한 업데이트를 방지할 때 사용한다.
+
+-라이프 사이클 메서드
+라이프사이클 메서드의 종류는 총 10가지 이다.
+Will접두사가 붙은 메서드는 어떤 작업을 작동하기 전에 실행되는 메서드
+Did접두사가 붙은 메서드는 어떤 작업을 작동한  후에 실행되는 메서드이다.
+
+라이프사이클은 총 세가지 카테고리로 나눈다.
+
+1.마운트(Mount)
+DOM이 생성되고 웹 브라우저 상에 나타나는 것을 마운트라고 한다.
+마운트 시 호출하는 메서드
+- constructor : 컴포넌트를 새로 만들 때마다 호출되는 클래스 생성자.
+- getDerivedStateFromProps : props에 있는 값을 state에 동기화 하는 메서드
+- render : 프로그래머가 준비한 UI를 렌더링 하는 메서드
+- componentDidMount : 컴포넌트가 웹 브라우저 상에 나타난 후 호출하는 메서드
+
+2.업데이트(Update)
+컴포넌트가 업데이트할 때는 총 네가지 경우가 있다.
+- props가 바뀔 때
+- state가 바뀔 때
+- 부모 컴포넌트가 리렌더링될 때
+- this.forceUpdate로 강제로 렌더링을 트리거할 때
+컴포넌트 업데이트시 호출하는 메서드
+-getDerivedStateFromProps : 이 메서드는 마운트 과정에서도 호출하며, 
+                            props가 바뀌어서 업데이트 할때도 호출한다.
+- shouldComponentUpdate : 컴포넌트가 리렌더링을 해야할지 말지를 결정하드 메서드   
+                          여기서 false를 반환하면 아래의 메서드들을 호출하지 않는다.
+- render : 컴포넌트를 리렌더링한다.
+- getSnapshotBeforeUpdate : 컴포넌트 변화를 DOM에 반영하기 바로 직전에 호출하는 메서드
+- componentDidUpdate : 컴포넌트의 업데이트 작업이 끝난 후 호출하는 메서드
+
+3.언마운트(Unmount)
+마운트의 반대 과정, 컴포넌트를 DOM에서 제거하는 것을 언마운트라고 한다.
+- componentWillUmnount : 컴포넌트가 웹 브라우저상에서 사라지기 전에 호출하는 메서드
+
+-위의 언급한 메서드 살펴보기
+
+1.render()
+이 메서드는 컴포넌트 모양새를 정의한다. 라이프사이클 메서드 중 유일한 필수 메서드
+이 메서드 안에서 this.props와 this.state에 접근 가능하며 리액트 요소를 반환한다.
+이 메서드 안에서는 절대 state를 변형해서는 안되며 웹 브라우저에 접근해서도 안된다.
+DOM 정보를 가져오거나 변화를 줄 때는 componentDidMount에서 처리 해야한다.
+
+2.constructor()
+컴포넌트의 생성자 메서드로 컴포넌트를 만들 때 처음으로 실행. 이메서드에서는 초기 state를 정할 수 있다.
+
+3.getDerivedStateFromProps()
+props로 받아온 값을 state에 동기화 시키는 용도로 사용하며, 
+컴포넌트를 마운트하거나 prpos를 변경할 때 호출한다.
+
+static getDerivedStateFromProps(nextProps, prevState){
+    if(nextProps.value !== prevState.value){ //조건에 따라 특정 값 동기화
+        return {value : nextProps.value}
+    }
+    return null; // sate를 변경할 필요가 없다면 null을 반환
+}
+
+4.componentDidMount()
+이메서드는 컴포넌트를 만들고 첫 렌더링을 다 마친 후 실행한다.
+이 안에서 다른 자바스크립트 라이브러리 또는 프레임워크의 함수를 호출 하거나
+이벤트 등록, setTimeout, setInterval, 네트워크 요청 같은 비동기 작업을 처리하면 된다.
+
+5.shouldComponentUpdate()
+props 또는 state를 변경했을 때, 리렌더링을 시작할지 여부를 지정하는 메서드
+이 메서드에서는 반드시 true, false 값을 반환해야한다. 컴포넌트를 만들 때 이 메서드를 호출하지않으면 자동적으로 true를 반환한다. 
+이 메서드가 false를 반환한다면 업데이트 과정은 여기서 중단된다.
+현재 props와 state는 this.props와 this.state로 접근하고 새로 설정될 props, state는 nextProps, nextState로 접근 가능.
+프로젝트의 성능을 최적화할 때 상황에 맞는 알고리즘을 작성하여 리렌더링을 방지할 때는false값을 반환하게 하면 된다.
+
+6.getSnapshotBeforeUpdate()
+이 메서드는 render 메서드를 호출한 후 DOM에 변화를 반영하기 바로 직전에 호출하는 메서드
+여기서 반환하는 값은 componentDidUpdate에서 세번째 파라미터인 snapshot값으로 전달 받을수 있는데 
+주로 업데이트하기 직전의 값을 참고할 일이 있을 때 활용한다. (예: 스크롤바 위치 유지)
+
+getSnapshotBeforeUpdate(prevProps, prevState){
+    if(prevState.array !== this.state.array){
+        const {scrollTop, scrollHeight} = this.list;
+        return {scrollTop, scrollHeight};
+    }
+}
+
+7.componentDidUpdate()
+리렌더링을 완료한 후 실행하고, 업데이트가 끝난 직후이므로 DOM 관련 처리를 해도 무방하다.
+여기에서는 prevProps, prevState를 사용하여 컴포넌트가 이전에 가졌던 데이터에 접근이 가능하다.
+또 getSnapshotBeforeUpdate에서 반환한 값이 있다면 여기에서 snapshot 값을 전달받을 수 있다.
+
+8.componentWillUmnount()
+컴포넌트를 DOM에서 제거할 때 실행한다. componentDidMount에서 등록한 이벤트, 타이머, 직접 생성한 DOM이 있다면 
+여기에서 제거를 해야한다.
+
+라이프사이클 메서드는 컴포넌트 상태에 변화가 있을 때마다 실행하는 메서드 이다.
+이 메서드들은 서드파티 라이브러리를 사용하거나 DOM을 직접 건드려야 하는 상황에서 유용하다.
+추가로 컴포넌트 업데이트의 성능을 개선할 때는 shouldComponentUpdate가 중요하게 사용된다.
