@@ -1,0 +1,24 @@
+만약 리액트에서 컴포넌트를 만들 때 라이프사이클과 state를 사용할 필요가 없고, 오로지 props를 전달받아 
+뷰를 렌더링하는 역할만 한다면 컴포넌트를 더 간단하게 선언할 수 있다.
+
+-함수형 컴포넌트 사용법
+
+ES5 문법
+function Hello(props){
+    return(
+        <div>Hello{props.name}</div>
+    );
+}
+
+ES6 문법
+const Hello = ({name}) => {
+    return(
+        <div>Hello {name}</div>
+    )
+}
+
+-함수형 컴포넌트를 사용할 때
+함수형 컴포넌트는 컴포넌트에서 라이프사이클, state 등 불필요한 기능을 제거한 상태이기 때문에 메모리 소모량은
+일반 클래스형 컴포넌트보다 적다. 
+리액트 프로젝트에서는 state를 사용하는 컴포넌트 개수를 최소화하면 좋고, state나 라이프사이클 메서드를 
+사용하지 않는다면 function component를 사용하는게 좋다. 
