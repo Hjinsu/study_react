@@ -1,0 +1,102 @@
+리액트에서 컴포넌트를 스타일링하는데 획일화된 방식은 없다. 
+개발자, 회사마다 요구하는 스펙이 다르고 취향에 따라 선택하기 때문에 
+매우 다양한 방식으로 컴포넌트를 스타일링할 수 있다.
+CSS를 작성하다 보면 클래스 네임이 중복될 가능성이 있어서 앞으로 
+클래스네임에 컴포넌트 이름을 접두사로 붙인다.
+
+-리액트 프로젝트시 자주 사용하는 컴포넌트 스타일링
+1.CSS Module: 모듈화된 CSS로 CSS클래스를 만들면 자동으로 고유한 클래스네임을 생성
+
+2.Sass : 자주 사용하는 CSS전처리기 중 하나, 확장된 CSS문법을 사용하여 CSS코드를 더욱 
+         쉽게 작성, 추가로 이를 CSS Module처럼 사용하는 방법을 알아본다.
+
+3.styled-components : 요즘 인기 있는 컴포넌트 스타일링 방식으로, JS코드 내부에서 
+                      스타일을 정의한다.
+
+-css Module 사용방법
+1. yarn eject를 하면 node_modules/ract-scripts경로에 내장된 리액트 프로젝트의 환경설정 파일들을 프로젝트 루트 경로로 이동한다.
+2.config/webpack.config.js 에서 css-loader 를 찾아 
+loader: require.resolve('css-loader'),
+        options: {
+          importLoaders: 1,
+          modules: true,    
+          localIdentName: '[path][name]__[local]--[hash:base64:5]',
+        },
+      },
+로 바꿔준다.
+
+CSS를 불러오는 과정에서 총 세가지 로더를 사용한다.
+1.style-loader는 스타일을 불러와 웹페이지에서 활성화 하는 역할
+2.css-loader는 css파일에서 import와 url 문을 webpack의 require기능으로 처리하는 역할
+3.postcss-loader는 모든 웹브라우저에서 입력한 CSS구문이 제대로 작동할수 있도록 
+  -webkit, -mos, -ms등 접두사를 붙여준다.
+
+CSS 클래스 적용법
+<div className={styles.box}>
+CSS 클래스가 여러개일 때 적용법
+<div className={[styles.box, styles.blue].join(' ')}>
+
+yarn add classnames 라이브러리 
+import classNames from 'classnames'
+<div className={classNames(styles.box, styles.blue)}>
+
+classNames가 편한 이유는 여러가지 형식으로 사용할수 있기 때문이다.
+예제에서는 클래스이름을 여러 파라미터로 나열하기만 했지만 이를 객체 형식이나 배열 형식 또는 
+혼용해서 전달이 가능하다.
+
+ex)
+classNames('foo', 'bar'); // => 'foo bar'
+classNames('foo', {bar : true}); // => 'foo bar'
+classNames({'foo-bar' : true}); // => 'foo-bar'
+classNames({'foo-bar' : false}); // => ''
+classNames({'foo' : true},{'bar' : true}); // => 'foo bar'
+//형식을 동시에 여러개 받아올 수도 있다.
+classNames('foo',{bar : true, duck : false}, 'baz', {quux : ture}); // => 'foo bar baz quux'
+//false, null, 0, undefined는 무시된다.
+classNames(null, false, 'bar', undefiend, 0, 1, {baz : null}); // => 'bar 1'
+
+classNames 바인드
+import classNames from 'classnames/bind'
+const cn = classNames.bind(styles);
+ <div className={cn('box', {blue : true})}>
+
+ -Sass 사용법
+ Sass는 Syntactically awesome style sheets의 약어로, 문법적으로 매우 멋진 스타일시트를 의미
+ Sass로는 CSS에서 사용할 수 있는 문법을 확장하여 중복되는 코드를 줄여 더욱 보기 좋게 작성 가능
+ Sass가 익숙하지 않다면 http://sass-gudidelin.es/ko/ 참고
+
+ 리액트 프로젝트에 Sass를 사용하기위해선 
+ yarn add node-sass sass-loader 패키지를 설치해야한다.
+
+ -Sass의 현재 선택자 참조
+ 특정 클래스에 마우스를 올릴 때나 클릭할 때 다른 스타일을 적용한다면
+ .box:hover, .box:active 이렇게 작성하지만 
+ Sass에선
+ .box{
+     &:hover{}
+     &:active{}
+ }
+이렇게 작성한다.
+이렇게 감싸인 구조로 CSS를 작성할 수 있어서 가독성이 높다.
+
+-sass 변수 사용
+Sass에선 자주 사용하는 값을 변수에 넣을수 있다.
+$box_size : 100px;
+.box{
+    width : $box_size;
+    height : $box_size;
+}
+
+-Sass mixin사용 
+선언
+@mixin place-at-center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+호출
+ @include place-at-center();
+
+ -변수와 믹스인을 전역적으로 사용
+ 변수와 믹스인은 여러 곳에서 재사용하기 위해 만든 것이다.
