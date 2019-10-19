@@ -12,3 +12,40 @@ Ducks 파일 구조이다.
     [라이브러리를 만들거나 어플을 여러 프로젝트로 나눈 것이 아니라면 맨 앞은 생략 가능 
      ex) counter/INCREMENT]
 4.외부 리듀서에서 모듈의 액션 타입이 필요할 때는 액션 타입을 내보내도 된다.
+
+-yarn add redux-actions
+createAction 사용
+
+export const increment = (index) => ({
+    type : types.INCREMENT,
+    index
+});
+    ->
+export const increment = createAction(types.INCREMENT);
+createAction 함수는 액션 생성 함수를 간단하게 만들어준다. 파라미터를 넣는 부분이 생략되었지만,
+이렇게 만든 함수에 파라미터를 넣어서 호출하면 payload키에 파라미터로 받은 값을 넣어 객체를 만들어준다.
+increment(3)
+/*
+{
+    type : 'INCREMENT'
+    payload : 3
+}
+*/
+두번째 파라미터에 payload생성 함수를 전달하여 코드상으로 명시해 줄 수도 있다.
+export const setColor = createAction(types.SET_COLOR, ({index, color}) => ({index, color}));
+
+-switch 문 대신 handleActions 사용
+리듀서에 switch문을 사용하여 액션 type에 따라 다른 작업을 하다록 했다.
+결점이 하나 있는데 scope를 리듀서 함수로 설정해서 서로 다른 case에서 let이나 const를 사용하여 변수를 선언하려고 할 떄,
+같은 이름이 중첩되어 있으면 문법 검사를 통해 오류가 발생한다. 이문제를 해결하는 것이 바로 handleActions이다.
+첫 파라미터로는 액션에 따라 실행할 함수들을 가진 객체
+두번째 파라미터로는 상태의 기본 값을 넣어준다.
+
+const reducer = handleActions({
+    INCREMENT : (state, action) => ({
+        counter : state.counter + action.payload
+    }),
+    DECREMENT : (state, action) => ({
+        counter : state.counter - action.payload
+    })
+}, {counter : 0});
