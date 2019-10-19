@@ -1,0 +1,194 @@
+Immutable.js는 자바스크립트에서 불변성 데이터를 다룰 수 있도록 도와준다.
+
+1.객체 불변성
+
+let a = 7;
+let b = 7;
+
+let object1 = {a : 1, b : 2};
+let object2 = {a : 1, b : 2};
+
+a === b //true
+object1 === object2 // 값이 같더라도 서로다른 객체이기 때문에 둘을 비교하면 false
+
+let object3 = object1;
+object1 === object3 // 둘다 같은 객체를 가리키기 때문에 true
+
+object3.c = 3;
+object1 === object3 // true
+object1 // {a :1 , b: 2, c : 3}
+
+let array1 = [0,1,2,3,4];
+let array2 = array1;
+array2.push(5);
+
+array1 === array2 // true
+
+리액트 컴포넌트는 state 또는 상위 컴포넌트에서 전달 받은 props 값이 변할 때 리렌더링되는데,
+배열이나 객체를 직접 수정한다면 내부값을 수정했을지다로 레퍼런스가 가리키는 곳은 같이 때문에 똑같은 값으로 인식한다.
+이러한 이슈 때문에 지금까지 여러 층으로 구성된 객체 또는 배열을 업데이트할 때 전개연산자(...)를 사용해서 
+기존 값을 가진 새로운객체 또는 배열을 만들었다.
+하지만 그렇게 작업하다 보면 간단한 변경을 구현하는데도 코드가 복잡할 때가 있다. 
+
+ex)
+let object1 = {
+    a : 1, b : 2, c : 3, 
+    d : {
+        e : 4,
+        f : {
+            g : 5,
+            h : 6
+        }
+    }
+};
+
+// h의 값을 10으로
+let object2 = {
+    ...object1,
+    d : {
+        ...object1.d,
+        f :{
+            ...object1.d.f,
+            h : 10
+        }
+    }
+}
+
+//불변성을 유지할 필요가 없을 때
+object1.d.f.h = 10;
+
+//Immutable.js 사용
+
+let object1 = Map({
+    a : 1, b : 2, c : 3, 
+    d: Map({
+        e : 4,
+        f : Map({
+            g : 5,
+            h : 6
+        })
+    })
+});
+
+let object2 = object1.setIn(['d', 'f', 'h'], 10);
+
+2.Immutable.Map
+Immutable의 Map은 객체 대신 사용하는 데이터 구조, 자바스크립트에 내장된 Map과 다르다.
+Map을 사용할 때는  Map함수 안에객체를 넣어서 호출한다.
+ex)
+const { Map } = Immutable;
+const data = Map({
+  a : 1, b : 2
+});
+
+const data = Map({
+  a : 1, b : 2,
+  c : Map({
+      d : 3, e : 4, f : 5
+  })
+});
+
+이처럼 객체 내부에 또 다른 객체들이 있다면 내부 객체들도 Map으로 감싸 주어야 나중에 사용하기 편하다.
+(내부 객체들도 Map을 필수적으로 써야하는건 아니지만, Map을 사용하지 않는다면 setIn,getIn을 활용할 수가 없다.)
+
+객체 내용을 네트워크에서 받아오거나 전달받는 객체가 너무 복잡한 상태라면 일일이 그 내부까지 Map으로 만들기 힘들땐
+fromJS를 사용할 수도 있다.
+
+const {Map, fromJS} = Immutable;
+
+const data = fromJS({
+     a : 1, b : 2,
+  c : {
+      d : 3, e : 4, f : 5
+  }
+})
+
+console.log(data)를 찍어보면 Immutable 데이터가 가진 내부 변수 및 함수들이 출력된다.
+해당 데이터를 실제로 활용하거나 업데이트를 해야 할 때는 내장 함수를 사용해야한다.
+
+-자바스크립트 객체로 변환
+const deserialized = data.toJS();
+
+-특정 키의 값 블러오기
+data.get('a');
+
+-깊숙히 위치하는 값 불러오기
+data.getIn(['c', 'd']);
+
+-값 설정
+const newData = data.set('a', 4);
+newData === data // set은 주어진 변화를 적용한 새 Map을 만들기 때문에 서로 다른 Map이라서 false
+
+-깊숙히 위치하는 값 설정
+const newData = data.setIn(['c', 'd'], 10);
+
+-여러 값 동시에 설정
+const newData = data.mergeIn(['c'], {d: 10, e : 10});
+또는 
+const newData = data.setIn(['c', 'd'], 10).setIn(['c', 'e'], 10);
+
+-최상위에서 merge
+const newData = data.merge({a : 10, b : 10});
+
+3.Immutable.List
+List는 Immutable 데이터 구조로 배열 대신 사용한다. 배열과 동일하게 map, filter, sort, push, pop 함수를 내장하고있다.
+이 내장 함수를 실행하면 List자체를 변경하는게아니라 새로운 List를 반환.
+또 리액트 컴포넌트느느 List 데이터 구조와 호환되기 때문에 map 함수를 사용하여 데이터가 들어있는 List를 컴포넌트 List로
+변환하여 JSX에서 보여주어도 제대로 렌더링된다.
+
+-List 생성
+const {List, Map, fromJS} = Immutable;
+const list = List([0,1,2,3,4]);
+
+객체들의 List를 만들어야 할 떄는 다음과 같이 객체들을 Map으로 만들어야 추후 get과 set을 사용할 수 있다.
+
+const list = List([
+    Map({value : 1}),
+    Map({value : 2})
+]);
+또는
+const list = fromJS([
+    {value : 1},
+    {value : 2}
+]);
+
+fromJS를 사용하면 내부 배열은 List로 만들고, 내부 객체는 Map으로 만든다.
+그리고 Map과 마찬가지로 List 도 toJS를 사용하여 일반 배열로 변환 가능하다. 
+
+-값 읽어 오기 
+n번째 원소 값은 get(n)을 사용하여 읽어온다.
+list.get(0);
+
+0번째 아이템의 value 값은 다음과 같이 읽어온다.
+list.getIn([0, 'value']);
+
+-아이템 수정
+n번째 아이템을 수정해야 할 때는 set과 setIn을 사용한다.
+
+원소를 통째로 바꾸고 싶을때는 set사용
+const newList = list.set(0, Map({value:10}));
+
+list의 map내부 값을 변경하고 싶을 때는 setIn 사용
+const newList = list.setIn([0, 'value'], 10);
+
+update를 사용하는 방법(첫 파라미터는 선택할 인덱스의 값, 두번째는 선택한 원소를 업데이트하는 *함수*)
+const newList = list.update(0, item => item.set('value', item.get('value') * 5));
+
+-아이템 추가
+push를 사용한다. Array처럼 기존 List자체에 아이템을 추가하는게 아니라 새 List를 만들어서 반환한다.
+List 맨 뒤에 추가
+const newList = list.push(Map({value : 3}));
+
+List 맨 앞에 추가
+const newList = list.unshift(Map({value : 3}));
+
+-아이템 제거
+인덱스가 1인 아이템 제거 
+const newList = list.delete(1);
+
+Array가 가진 내장함수를 List도 대부분가지고 있어서 Array의 함수를 사용할수있다.
+const newList = list.pop();
+
+-List의 크기, 비어있는지 확인
+list.size;
+list.isEmpty();
